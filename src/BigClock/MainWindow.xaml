@@ -1,0 +1,127 @@
+<Window x:Class="BigClock.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BigClock"
+        MinWidth="340" MinHeight="210"
+        Closing="OnClosing"
+        PreviewKeyDown="OnPreviewKeyDown">
+    <Window.Resources>
+        <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+        <Style x:Key="IconToggle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Width" Value="42" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+        </Style>
+        <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20,8,20,14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="60" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition x:Name="CalendarRow" Height="2.6*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Viewbox Grid.Row="0" Stretch="Uniform">
+            <TextBlock x:Name="TimeText"
+                       AutomationProperties.AutomationId="Time"
+                       FontFamily="Segoe UI Variable Display, Segoe UI"
+                       FontWeight="SemiBold"
+                       Typography.NumeralAlignment="Tabular"
+                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+        </Viewbox>
+
+        <TextBlock x:Name="DateText" Grid.Row="1"
+                   AutomationProperties.AutomationId="Date"
+                   FontSize="22"
+                   TextAlignment="Center"
+                   TextTrimming="CharacterEllipsis"
+                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+        <Viewbox x:Name="CalendarPanel" Grid.Row="2" Margin="0,14,0,10" Stretch="Uniform"
+                 PreviewMouseWheel="OnCalendarMouseWheel">
+            <StackPanel Width="392">
+                <DockPanel Margin="0,0,0,8" LastChildFill="True">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource NavButton}" Content="&#xE76C;"
+                            AutomationProperties.Name="Next month" ToolTip="Next month (Right arrow)"
+                            Click="OnNextMonth" />
+                    <Button DockPanel.Dock="Right" Style="{StaticResource NavButton}" Content="&#xE76B;" Margin="0,0,4,0"
+                            AutomationProperties.Name="Previous month" ToolTip="Previous month (Left arrow)"
+                            Click="OnPreviousMonth" />
+                    <Button DockPanel.Dock="Right" Content="Today" Height="34" Margin="0,0,4,0"
+                            ToolTip="Back to this month (Home)"
+                            Click="OnToday" />
+                    <TextBlock x:Name="MonthText"
+                               AutomationProperties.AutomationId="Month"
+                               FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                </DockPanel>
+
+                <ItemsControl x:Name="HeaderItems" IsTabStop="False" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="7" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Height="30" FontSize="13" FontWeight="SemiBold"
+                                       TextAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ItemsControl x:Name="DayItems" IsTabStop="False" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="7" Rows="6" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="Cell" Width="44" Height="44" Margin="6,2" CornerRadius="22" Background="Transparent">
+                                <TextBlock x:Name="Number" Text="{Binding Day}" FontSize="17"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsInMonth}" Value="False">
+                                    <Setter TargetName="Number" Property="Opacity" Value="0.35" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                    <Setter TargetName="Number" Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                    <Setter TargetName="Number" Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Viewbox>
+
+        <DockPanel Grid.Row="3" Margin="0,8,0,0" LastChildFill="False">
+            <ToggleButton x:Name="PinToggle" Style="{StaticResource IconToggle}" Content="&#xE718;"
+                          AutomationProperties.Name="Always on top" ToolTip="Always on top" />
+            <ToggleButton x:Name="CompactToggle" Style="{StaticResource IconToggle}" Content="&#xE73F;"
+                          AutomationProperties.Name="Clock only" ToolTip="Clock only (hide the calendar)" />
+            <ToggleButton x:Name="StartupToggle" Style="{StaticResource IconToggle}" Content="&#xE7E8;"
+                          AutomationProperties.Name="Start with Windows" ToolTip="Start with Windows" />
+            <Button x:Name="UpdateButton" DockPanel.Dock="Right" Height="36"
+                    AutomationProperties.AutomationId="Update"
+                    Click="OnUpdateClick" />
+        </DockPanel>
+    </Grid>
+</Window>
